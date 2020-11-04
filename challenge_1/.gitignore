@@ -1,1 +1,3 @@
-public/app.js
+.eslintignore
+.package-lock.jsom
+bundle.js
