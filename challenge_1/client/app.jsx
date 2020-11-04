@@ -1,16 +1,22 @@
+/* eslint-disable react/no-unused-state */
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import React from 'react';
 import axios from 'axios';
+import ReactPaginate from 'react-paginate';
 
 class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       search: '',
-      results: null,
+      offset: 0,
+      data: [],
+      perPage: 10,
+      currentPage: 0,
     };
     this.updateSearch = this.updateSearch.bind(this);
     this.search = this.search.bind(this);
+    this.changePage = this.changePage.bind(this);
   }
 
   updateSearch(e) {
@@ -21,9 +27,10 @@ class App extends React.Component {
   }
 
   search(e) {
-    e.preventDefault();
+    if (e) {
+      e.preventDefault();
+    }
     const { search } = this.state;
-    console.log(search);
     axios({
       method: 'get',
       url: `http://localhost:3000/events?q=${search}`,
@@ -32,12 +39,41 @@ class App extends React.Component {
       },
     })
       .then((response) => {
-        console.log(response.data);
+        const { offset, perPage } = this.state;
+        const { data } = response;
+        const slice = data.slice(offset, offset + perPage);
+        const postData = slice.map((pd) => (
+          <>
+            <p>
+              {pd.date}
+              {'\n'}
+              {pd.description}
+            </p>
+          </>
+        ));
+
+        this.setState({
+          pageCount: Math.ceil(data.length / perPage),
+
+          postData,
+        });
       });
   }
 
+  changePage(e) {
+    const { perPage } = this.state;
+    const page = e.selected;
+    const offset = page * perPage;
+    this.setState({
+      currentPage: page,
+      offset,
+    }, () => {
+      this.search();
+    });
+  }
+
   render() {
-    const { search } = this.state;
+    const { search, postData, pageCount } = this.state;
     return (
       <div>
         <form onSubmit={this.search}>
@@ -45,6 +81,22 @@ class App extends React.Component {
           <input type="text" value={search} onChange={this.updateSearch} />
           <input type="submit" onSubmit={this.search} />
         </form>
+        <div>
+          {postData}
+          <ReactPaginate
+            previousLabel="prev"
+            nextLabel="next"
+            breakLabel="..."
+            breakClassName="break-me"
+            pageCount={pageCount}
+            marginPagesDisplayed={2}
+            pageRangeDisplayed={5}
+            onPageChange={this.changePage}
+            containerClassName="pagination"
+            subContainerClassName="pages pagination"
+            activeClassName="active"
+          />
+        </div>
       </div>
     );
   }
