@@ -1,9 +1,12 @@
+/* eslint-disable max-len */
+/* eslint-disable import/extensions */
 /* eslint-disable react/no-unused-state */
 /* eslint-disable prefer-destructuring */
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import React from 'react';
 import axios from 'axios';
-import ReactPaginate from 'react-paginate';
+// import ReactPaginate from 'react-paginate';
+import Pagination from './Pagination.jsx';
 
 class App extends React.Component {
   constructor(props) {
@@ -42,7 +45,7 @@ class App extends React.Component {
     }
     axios({
       method: 'get',
-      url: url,
+      url,
       headers: {
         'Access-Control-Allow-Origin': '*',
       },
@@ -54,7 +57,6 @@ class App extends React.Component {
         if (!response.headers.link.includes('next')) {
           hasNext = false;
         }
-        console.log(hasNext);
         const pages = response.headers.link.split(',');
         const links = [];
         for (let i = 0; i < pages.length; i += 1) {
@@ -120,12 +122,13 @@ class App extends React.Component {
         <div>
           {postData}
         </div>
-        <div id="nav">
+        <Pagination first={first} previous={previous} next={next} last={last} changePage={this.changePage} />
+        {/* <div id="nav">
           <button type="button" id={first} className="first" onClick={this.changePage}>First</button>
           <button type="button" id={previous} className="previous" onClick={this.changePage}>Previous</button>
           <button type="button" id={next} className="next" onClick={this.changePage}>Next</button>
           <button type="button" id={last} className="last" onClick={this.changePage}>Last</button>
-        </div>
+        </div> */}
       </div>
     );
   }
